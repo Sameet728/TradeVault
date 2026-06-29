@@ -71,9 +71,9 @@ export default function LandingPage() {
                 </SignUpButton>
               </>
             ) : (
-              <Link href="/dashboard" className="nav-btn-primary">
+              <a href="/dashboard" className="nav-btn-primary">
                 Dashboard <ArrowUpRight size={13} />
-              </Link>
+              </a>
             )}
           </div>
         </div>
@@ -106,9 +106,9 @@ export default function LandingPage() {
                 </SignInButton>
               </>
             ) : (
-              <Link href="/dashboard" className="cta-primary">
+              <a href="/dashboard" className="cta-primary">
                 Go to Dashboard <LayoutDashboard size={15} />
-              </Link>
+              </a>
             )}
           </div>
           <div className="hero-stats">
@@ -543,9 +543,9 @@ export default function LandingPage() {
                 <button className="cta-primary">Open Dashboard Free <ArrowRight size={15} /></button>
               </SignUpButton>
             ) : (
-              <Link href="/dashboard" className="cta-primary">
+              <a href="/dashboard" className="cta-primary">
                 Go to Dashboard <LayoutDashboard size={15} />
-              </Link>
+              </a>
             )}
           </div>
         </div>
@@ -587,33 +587,10 @@ export default function LandingPage() {
       <style jsx>{`
         /* ── Container ── */
         .land {
-          --color-background:       #0A0A0A;
-          --color-surface:          #111111;
-          --color-card:             #171717;
-          --color-card-hover:       #1C1C1C;
-          --color-border:           #262626;
-          --color-border-subtle:    #1C1C1C;
-          --color-foreground:       #FAFAFA;
-          --color-muted-foreground: #A1A1AA;
-          --color-placeholder:      #52525B;
-          --color-accent:           #2563EB;
-          --color-accent-hover:     #1D4ED8;
-          --color-accent-muted:     rgba(37, 99, 235, 0.12);
-          --color-accent-subtle:    rgba(37, 99, 235, 0.06);
-          --color-success:          #22C55E;
-          --color-success-muted:    rgba(34, 197, 94, 0.10);
-          --color-loss:             #EF4444;
-          --color-loss-muted:       rgba(239, 68, 68, 0.10);
-          --color-warning:          #F59E0B;
-          --color-warning-muted:    rgba(245, 158, 11, 0.10);
-          --color-info:             #06B6D4;
-          --color-info-muted:       rgba(6, 182, 212, 0.10);
-
           min-height: 100vh;
           background: var(--color-background);
           color: var(--color-foreground);
           font-family: var(--font-sans);
-          color-scheme: dark;
         }
 
         /* ── Navbar ── */
