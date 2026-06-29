@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { ClerkProvider } from '@clerk/nextjs';
-import { shadcn } from '@clerk/ui/themes';
+import { dark } from '@clerk/themes';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 
 const inter = Inter({
@@ -33,7 +33,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <ClerkProvider appearance={{ theme: shadcn }}>
+          <ClerkProvider 
+            appearance={{ 
+              theme: dark,
+              variables: {
+                colorPrimary: '#3b82f6',
+              }
+            }}
+          >
             {children}
             <Toaster
               position="bottom-right"
