@@ -40,8 +40,10 @@ export function PropTrackerClient({ accounts, trades }: PropTrackerClientProps) 
         const todayTrades = accountTrades.filter((t) => t.tradeDate?.startsWith(today));
         const todayPnL = todayTrades.reduce((s, t) => s + (t.pnl ?? 0), 0);
 
-        const currentBalance = account.balance;
         const startBalance = props.startingBalance;
+        const closedTrades = accountTrades.filter(t => t.status === 'closed');
+        const trueTotalPnL = closedTrades.reduce((sum, t) => sum + (t.pnl ?? 0), 0);
+        const currentBalance = startBalance + trueTotalPnL;
         const profitPercent = ((currentBalance - startBalance) / startBalance) * 100;
         const profitTargetPercent = props.profitTarget;
         const progressToTarget = Math.min(100, Math.max(0, (profitPercent / profitTargetPercent) * 100));

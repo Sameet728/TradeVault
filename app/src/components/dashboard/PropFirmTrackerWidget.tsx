@@ -84,8 +84,8 @@ export function PropFirmTrackerWidget() {
       </div>
 
       <style jsx>{`
-        .prop-firm-widget { padding: 0; background: linear-gradient(180deg, rgba(30,30,30,0) 0%, rgba(10,10,10,0.5) 100%); }
-        .card-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--color-border-subtle); }
+        .prop-firm-widget { padding: 0; background: var(--color-surface); overflow: hidden; }
+        .card-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-accent-subtle); }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .flex { display: flex; }
         .align-center { align-items: center; }

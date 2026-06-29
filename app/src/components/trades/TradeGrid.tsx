@@ -36,7 +36,7 @@ export function TradeGrid({
               <div className="trade-thumbnail" style={{ height: '160px', background: 'var(--color-border-subtle)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {trade.screenshots && trade.screenshots.length > 0 ? (
                   <img 
-                    src={trade.screenshots[0]} 
+                    src={trade.screenshots[1] || trade.screenshots[0]} 
                     alt={`${trade.symbol} trade`}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
@@ -68,7 +68,7 @@ export function TradeGrid({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600, color: 'var(--color-foreground)' }}>{trade.symbol}</h3>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-muted-foreground)' }}>
-                    {formatDate(trade.tradeDate, 'MMM dd, yyyy')}
+                    {formatDate(trade.tradeDate, 'MMM dd, yyyy HH:mm')}
                   </span>
                 </div>
                 

@@ -53,20 +53,28 @@ Extract the following information about the trade if visible:
 1. symbol: The trading symbol (e.g., XAUUSD, EURUSD, BTCUSDT, US30, SPX500, NQ100). Return just the raw letters.
 2. direction: Either "LONG" or "SHORT"
 3. entryPrice: The exact entry price as a number
-4. stopLoss: The exact stop loss price as a number (if visible)
-5. takeProfit: The exact take profit price as a number (if visible)
-6. rr: The Risk to Reward ratio as a number (e.g. 2.5, 3.1)
-7. session: The trading session this likely occurred in. Options: "London", "New York", "Asian", "Sydney", "London/NY Overlap", "Other". Estimate based on timezone/time if visible, otherwise return null.
+5. exitPrice: The exact close/exit price as a number (e.g., the price at which the position was closed). Note: This is different from Take Profit. If this is an MT4/MT5 history row, the exit price is usually the last price column before profit.
+6. stopLoss: The exact stop loss price as a number (if visible)
+7. takeProfit: The exact take profit price as a number (if visible). If the trade is closed and TP is empty, return the exit price as the take profit.
+8. lotSize: The volume, lot size, or position size as a number (e.g., 0.06, 1.0).
+9. pnl: The total net profit or loss amount as a number (if visible, e.g. 259.20)
+10. rr: The Risk to Reward ratio as a number (e.g. 2.5, 3.1)
+11. session: The trading session this likely occurred in. Options: "London", "New York", "Asian", "Sydney", "London/NY Overlap", "Other". Estimate based on timezone/time if visible, otherwise return null.
+12. tradeDate: The exact date and time the trade was opened/executed, formatted as a standard ISO string for a local datetime input (e.g. "2026-06-29T13:19"). Look for timestamps like "2026.06.29 13:19:25" in the image.
 
 Return ONLY a valid JSON object matching this exact format, with no markdown formatting or extra text:
 {
   "symbol": string | null,
   "direction": "LONG" | "SHORT" | null,
   "entryPrice": number | null,
+  "exitPrice": number | null,
   "stopLoss": number | null,
   "takeProfit": number | null,
+  "lotSize": number | null,
+  "pnl": number | null,
   "rr": number | null,
-  "session": string | null
+  "session": string | null,
+  "tradeDate": string | null
 }
 `;
 

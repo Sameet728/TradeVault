@@ -41,12 +41,6 @@ export default async function DashboardPage() {
       <PageHeader
         title="Dashboard"
         description="Your trading performance at a glance"
-        actions={
-          <Link href="/trades/new" id="btn-dashboard-add-trade" className="btn-add">
-            <Plus size={14} />
-            Add Trade
-          </Link>
-        }
       />
 
       {/* Account selector hint */}
@@ -64,7 +58,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Prop Firm Tracker */}
-      <div className="mb-6">
+      <div style={{ marginBottom: '10px' }}>
         <PropFirmTrackerWidget />
       </div>
 

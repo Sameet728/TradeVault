@@ -68,18 +68,18 @@ export default function PlaybooksPage() {
           </div>
           <div className="card-body">
             <div className="form-group mb-4">
-              <label>Setup Name</label>
+              <label className="form-label">Setup Name</label>
               <input 
-                className="input-field" 
+                className="form-input" 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder="e.g. A+ Liquidity Sweep" 
               />
             </div>
             <div className="form-group mb-4">
-              <label>Description</label>
+              <label className="form-label">Description</label>
               <textarea 
-                className="input-field" 
+                className="form-textarea" 
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)} 
                 placeholder="Explain the logic behind this setup..."
@@ -87,12 +87,12 @@ export default function PlaybooksPage() {
               />
             </div>
             <div className="form-group mb-4">
-              <label>Criteria Checklist (one per line)</label>
+              <label className="form-label">Criteria Checklist (one per line)</label>
               <textarea 
-                className="input-field" 
+                className="form-textarea" 
                 value={criteria} 
                 onChange={(e) => setCriteria(e.target.value)} 
-                placeholder="15m BOS\\nLondon Session\\nRR > 2"
+                placeholder="15m BOS\nLondon Session\nRR > 2"
                 rows={4}
               />
             </div>
@@ -143,9 +143,12 @@ export default function PlaybooksPage() {
         .flex { display: flex; }
         .gap-2 { gap: 8px; }
         .justify-end { justify-content: flex-end; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--color-border-subtle); }
+        .card-header h3 { margin: 0; font-size: 1rem; font-weight: 600; color: var(--color-foreground); }
+        .card-body { padding: 20px; }
         .empty-state { text-align: center; padding: 60px 20px; color: var(--color-placeholder); }
         .playbooks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-        .playbook-card { display: flex; flex-direction: column; }
+        .playbook-card { display: flex; flex-direction: column; padding: 20px; }
         .pb-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .pb-header h3 { margin: 0; font-size: 1rem; font-weight: 600; color: var(--color-foreground); }
         .badge { background: var(--color-border); padding: 2px 8px; border-radius: 12px; font-size: 0.6875rem; font-weight: 600; }

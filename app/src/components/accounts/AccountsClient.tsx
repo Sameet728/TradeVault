@@ -3,10 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { createAccountAction, deleteAccountAction } from '@/actions/account.actions';
-import type { TradingAccount } from '@/types/ai.types';
+import { createAccountAction, deleteAccountAction, updateAccountAction } from '@/actions/account.actions';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { Plus, Wallet, Trash2, Target, TrendingUp } from 'lucide-react';
+import { Plus, Wallet, Trash2, Target, TrendingUp, Share2, Globe, Link as LinkIcon, Edit2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 const BROKERS = [
@@ -26,6 +25,7 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [accountName, setAccountName] = useState('');
   const [broker, setBroker] = useState(BROKERS[0]);
@@ -40,6 +40,7 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
   const [maxDD, setMaxDD] = useState('');
 
   function resetForm() {
+    setEditingId(null);
     setAccountName(''); setBroker(BROKERS[0]); setCustomBroker('');
     setPlatform('MT5'); setBalance(''); setCurrency('USD');
     setAccountType('personal'); setAccountNumber('');
@@ -47,11 +48,34 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
     setShowForm(false);
   }
 
-  function handleCreate(e: React.FormEvent) {
+  function handleEditClick(acc: any) {
+    setEditingId(acc._id);
+    setAccountName(acc.accountName);
+    const knownBroker = BROKERS.includes(acc.broker) ? acc.broker : 'Other';
+    setBroker(knownBroker);
+    if (knownBroker === 'Other') setCustomBroker(acc.broker);
+    setPlatform(acc.platform);
+    setBalance(acc.balance.toString());
+    setCurrency(acc.currency);
+    setAccountType(acc.type);
+    setAccountNumber(acc.accountNumber || '');
+    if (acc.type === 'prop' && acc.propFirmSettings) {
+      setProfitTarget(acc.propFirmSettings.profitTarget.toString());
+      setDailyDD(acc.propFirmSettings.dailyDrawdownLimit.toString());
+      setMaxDD(acc.propFirmSettings.maxDrawdownLimit.toString());
+    } else {
+      setProfitTarget(''); setDailyDD(''); setMaxDD('');
+    }
+    setShowForm(true);
+    // scroll to form
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
+
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     startTransition(async () => {
       const finalBroker = broker === 'Other' ? customBroker : broker;
-      const result = await createAccountAction({
+      const data = {
         accountName,
         broker: finalBroker,
         platform,
@@ -66,13 +90,25 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
           maxDrawdownLimit: parseFloat(maxDD) || 10,
           startingBalance: parseFloat(balance) || 0,
         } : undefined,
-      });
-      if (result.error) {
-        toast.error(result.error);
+      };
+
+      if (editingId) {
+        const result = await updateAccountAction(editingId, data);
+        if (result.error) toast.error(result.error);
+        else {
+          toast.success('Account updated!');
+          resetForm();
+          router.refresh();
+        }
       } else {
-        toast.success('Account created!');
-        resetForm();
-        router.refresh();
+        const result = await createAccountAction(data);
+        if (result.error) {
+          toast.error(result.error);
+        } else {
+          toast.success('Account created!');
+          resetForm();
+          router.refresh();
+        }
       }
     });
   }
@@ -84,6 +120,57 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
       if (result.error) toast.error(result.error);
       else { toast.success('Account deleted'); router.refresh(); }
     });
+  }
+
+  async function togglePublic(accountId: string, currentStatus: boolean) {
+    try {
+      const res = await fetch('/api/accounts/public', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId, isPublic: !currentStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.isPublic ? 'Account is now public!' : 'Account is now private!');
+        router.refresh();
+      } else {
+        toast.error(data.error);
+      }
+    } catch (err) {
+      toast.error('Failed to update public status');
+    }
+  }
+
+  function copyPublicLink(slug: string) {
+    const url = `${window.location.origin}/u/${slug}`;
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url)
+        .then(() => toast.success('Public link copied to clipboard!'))
+        .catch(() => toast.error('Failed to copy link.'));
+    } else {
+      // Fallback for insecure HTTP contexts (e.g., local network IP)
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) {
+          toast.success('Public link copied to clipboard!');
+        } else {
+          toast.error('Failed to copy. Please manually copy the URL.');
+        }
+      } catch (err) {
+        toast.error('Failed to copy. Please manually copy the URL.');
+      }
+    }
   }
 
   return (
@@ -123,14 +210,32 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
                         {account.type === 'prop' ? 'Prop Firm' : 'Personal'}
                       </span>
                     </div>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDelete(account._id, account.accountName)}
-                      disabled={isPending}
-                      title="Delete account"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                    
+                    <div className="account-actions ml-auto">
+                      <button
+                        className="action-btn"
+                        onClick={() => handleEditClick(account)}
+                        disabled={isPending}
+                        title="Edit account"
+                      >
+                        <Edit2 size={13} />
+                      </button>
+                      <button
+                        className={`action-btn ${account.isPublic ? 'active' : ''}`}
+                        onClick={() => togglePublic(account._id, account.isPublic)}
+                        title={account.isPublic ? "Make private" : "Make public"}
+                      >
+                        <Globe size={13} />
+                      </button>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(account._id, account.accountName)}
+                        disabled={isPending}
+                        title="Delete account"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="account-name">{account.accountName}</div>
@@ -176,6 +281,20 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
                   {account.accountNumber && (
                     <div className="account-number">#{account.accountNumber}</div>
                   )}
+
+                  {account.isPublic && account.publicSlug && (
+                    <div className="public-link-box">
+                      <div className="public-indicator">
+                        <span className="dot"></span> Live Public Profile
+                      </div>
+                      <button 
+                        className="copy-link-btn" 
+                        onClick={() => copyPublicLink(account.publicSlug!)}
+                      >
+                        <LinkIcon size={12} /> Copy Link
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -193,8 +312,8 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
       {/* Create Form */}
       {showForm && (
         <div className="create-form-wrap card animate-fade-in">
-          <h3 className="form-title">New Trading Account</h3>
-          <form onSubmit={handleCreate} className="create-form">
+          <h3 className="form-title">{editingId ? 'Edit Trading Account' : 'New Trading Account'}</h3>
+          <form onSubmit={handleSubmit} className="create-form">
             <div className="form-row">
               <div className="field">
                 <label className="field-label">Account Name *</label>
@@ -267,7 +386,7 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
             <div className="form-footer">
               <button type="button" className="btn-cancel" onClick={resetForm}>Cancel</button>
               <button id="btn-save-account" type="submit" className="btn-save" disabled={isPending}>
-                {isPending ? <span className="spinner" /> : 'Create Account'}
+                {isPending ? <span className="spinner" /> : (editingId ? 'Save Changes' : 'Create Account')}
               </button>
             </div>
           </form>
@@ -282,7 +401,10 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
         .account-header { display: flex; align-items: center; gap: 10px; }
         .account-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--color-border-subtle); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; }
         .account-type-badge { margin-left: 4px; }
-        .delete-btn { margin-left: auto; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: none; border: none; color: var(--color-placeholder); cursor: pointer; transition: all 0.15s; }
+        .account-actions { margin-left: auto; display: flex; gap: 4px; }
+        .action-btn, .delete-btn { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: none; border: none; color: var(--color-placeholder); cursor: pointer; transition: all 0.15s; }
+        .action-btn:hover { color: #3b82f6; background: rgba(59,130,246,0.08); }
+        .action-btn.active { color: #22c55e; background: rgba(34,197,94,0.1); }
         .delete-btn:hover { color: #ef4444; background: rgba(239,68,68,0.08); }
         .account-name { font-size: 1rem; font-weight: 600; color: var(--color-foreground); }
         .account-broker { font-size: 0.8125rem; color: #71717a; }
@@ -301,6 +423,11 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
         .progress-fill { height: 100%; background: #3b82f6; border-radius: 99px; transition: width 0.5s ease; }
         .progress-text { font-size: 0.6875rem; color: var(--color-placeholder); white-space: nowrap; }
         .account-number { font-size: 0.75rem; color: var(--color-placeholder); font-family: monospace; }
+        .public-link-box { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.1); border-radius: 6px; margin-top: 8px; }
+        .public-indicator { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #22c55e; font-weight: 500; }
+        .dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 6px #22c55e; animation: pulse 2s infinite; }
+        .copy-link-btn { display: flex; align-items: center; gap: 4px; background: none; border: none; color: var(--color-foreground); font-size: 0.75rem; cursor: pointer; opacity: 0.8; transition: opacity 0.15s; }
+        .copy-link-btn:hover { opacity: 1; color: #3b82f6; }
         .btn-create-float { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; color: #3b82f6; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: inherit; align-self: flex-start; }
         .btn-create-float:hover { background: rgba(59,130,246,0.14); }
         .btn-primary-link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #3b82f6; border-radius: 8px; color: white; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background 0.15s; border: none; font-family: inherit; }

@@ -175,6 +175,23 @@ p  { line-height: 1.6; color: var(--color-muted-foreground); }
   background: var(--color-card-hover);
 }
 
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-foreground);
+}
+.card-body {
+  padding: 20px;
+}
+
 /* ══════════════════════════════════════
    BADGES
 ══════════════════════════════════════ */
@@ -440,8 +457,9 @@ p  { line-height: 1.6; color: var(--color-muted-foreground); }
 ══════════════════════════════════════ */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px; margin-bottom: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px; 
+  margin-bottom: 20px;
 }
 @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }

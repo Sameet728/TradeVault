@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createTradeAction, updateTradeAction } from '@/actions/trade.actions';
@@ -36,8 +36,17 @@ export function TradeForm({ accounts, strategies, trade }: TradeFormProps) {
   const [pnl, setPnl] = useState(trade?.pnl?.toString() ?? '');
   const [rr, setRr] = useState(trade?.rr?.toString() ?? '');
   const [tradeDate, setTradeDate] = useState(
-    trade?.tradeDate ? formatDate(trade.tradeDate, 'yyyy-MM-dd') : new Date().toISOString().split('T')[0]
+    trade?.tradeDate ? formatDate(trade.tradeDate, "yyyy-MM-dd'T'HH:mm") : ''
   );
+
+  useEffect(() => {
+    if (!trade?.tradeDate) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      setTradeDate(now.toISOString().slice(0, 16));
+    }
+  }, [trade]);
+
   const [session, setSession] = useState<TradeSession | ''>(trade?.session as TradeSession ?? '');
   const [status, setStatus] = useState<'open' | 'closed'>(trade?.status as 'open' | 'closed' ?? 'closed');
   const [tags, setTags] = useState(trade?.tags?.join(', ') ?? '');
@@ -75,6 +84,11 @@ export function TradeForm({ accounts, strategies, trade }: TradeFormProps) {
 
   // --- AI Auto-fill ---
   const [isExtracting, setIsExtracting] = useState(false);
+  const hasScreenshotsRef = useRef(screenshots.length > 0);
+  
+  useEffect(() => {
+    hasScreenshotsRef.current = screenshots.length > 0;
+  }, [screenshots.length]);
 
   useEffect(() => {
     function handlePaste(e: ClipboardEvent) {
@@ -98,7 +112,7 @@ export function TradeForm({ accounts, strategies, trade }: TradeFormProps) {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64 = reader.result as string;
-        const isReferenceImage = screenshots.length > 0;
+        const isReferenceImage = hasScreenshotsRef.current;
         if (isReferenceImage) toast.info('Uploading reference image...');
         else toast.info('Analyzing screenshot with AI...');
         
@@ -116,15 +130,26 @@ export function TradeForm({ accounts, strategies, trade }: TradeFormProps) {
           }
 
           if (json.data) {
-            const { symbol, direction, entryPrice, stopLoss, takeProfit, rr, session } = json.data;
+            const { symbol, direction, entryPrice, exitPrice, stopLoss, takeProfit, lotSize, pnl, rr, session, tradeDate: aiTradeDate } = json.data;
             
             if (symbol) setSymbol(symbol);
-            if (direction) setDirection(direction);
+            if (direction) setDirection(direction as 'LONG' | 'SHORT');
             if (entryPrice) setEntryPrice(entryPrice.toString());
+            if (exitPrice) setExitPrice(exitPrice.toString());
             if (stopLoss) setStopLoss(stopLoss.toString());
-            if (takeProfit) setTakeProfit(takeProfit.toString());
+            
+            if (takeProfit) {
+              setTakeProfit(takeProfit.toString());
+            } else if (exitPrice) {
+              setTakeProfit(exitPrice.toString());
+            }
+
+            if (lotSize) setLotSize(lotSize.toString());
+            if (pnl) setPnl(pnl.toString());
             if (rr) setRr(rr.toString());
             if (session && SESSIONS.includes(session as any)) setSession(session as TradeSession);
+            if (aiTradeDate) setTradeDate(aiTradeDate);
+            if (exitPrice && pnl) setStatus('closed');
             
             toast.success('Trade details extracted successfully!');
           } else {
@@ -334,7 +359,7 @@ export function TradeForm({ accounts, strategies, trade }: TradeFormProps) {
           {isExtracting ? (
             <>
               <span className="spinner ai-spinner" />
-              <p>Gemini AI is analyzing your screenshot...</p>
+              <p>{screenshots.length > 0 ? 'Uploading reference image...' : 'Gemini AI is analyzing your screenshot...'}</p>
             </>
           ) : (
             <>
@@ -425,8 +450,8 @@ export function TradeForm({ accounts, strategies, trade }: TradeFormProps) {
             <input id="input-tp" type="number" step="any" placeholder="0.00" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} className="form-input" />
           </div>
           <div className="field">
-            <label className="field-label">Trade Date *</label>
-            <input id="input-date" type="date" value={tradeDate} onChange={(e) => setTradeDate(e.target.value)} required className="form-input" />
+            <label className="field-label">Trade Date & Time *</label>
+            <input id="input-date" type="datetime-local" value={tradeDate} onChange={(e) => setTradeDate(e.target.value)} required className="form-input" />
           </div>
         </div>
 

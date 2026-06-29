@@ -266,16 +266,21 @@ export function Sidebar({ userName, isOpen = true, onClose, onCollapsedChange }:
         /* Footer */
         .sidebar-footer {
           border-top: 1px solid var(--color-border-subtle);
-          padding: 10px 10px;
-          display: flex; flex-direction: column; gap: 8px;
+          padding: 10px 12px;
+          display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 8px;
           flex-shrink: 0;
+        }
+        :global(.sidebar.collapsed) .sidebar-footer {
+          flex-direction: column;
+          padding: 10px 8px;
+          justify-content: center;
         }
         .sidebar-user-row {
           display: flex; align-items: center;
           min-width: 0; overflow: hidden;
         }
         .sidebar-footer-actions {
-          display: flex; align-items: center; gap: 6px;
+          display: flex; align-items: center; flex-shrink: 0;
         }
       `}</style>
     </>

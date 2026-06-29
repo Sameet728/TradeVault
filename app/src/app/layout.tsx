@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
-import { ClerkProvider } from '@clerk/nextjs';
-import { dark } from '@clerk/themes';
+import { ClerkThemeProvider } from '@/components/layout/ClerkThemeProvider';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { CommandPalette } from '@/components/shared/CommandPalette';
 
@@ -34,14 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <ClerkProvider 
-            appearance={{ 
-              theme: dark,
-              variables: {
-                colorPrimary: '#3b82f6',
-              }
-            }}
-          >
+          <ClerkThemeProvider>
             {children}
             <CommandPalette />
             <Toaster
@@ -54,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 },
               }}
             />
-          </ClerkProvider>
+          </ClerkThemeProvider>
         </ThemeProvider>
       </body>
     </html>

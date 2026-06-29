@@ -174,6 +174,9 @@ export default function StrategyBuilderPage() {
         .mt-4 { margin-top: 16px; }
         .mt-6 { margin-top: 24px; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--color-border-subtle); display: flex; align-items: center; justify-content: space-between; }
+        .card-header h3 { margin: 0; font-size: 1rem; font-weight: 600; color: var(--color-foreground); }
+        .card-body { padding: 20px; }
         .param-types { display: flex; gap: 8px; }
         .input-field-sm { 
           background: var(--color-background); border: 1px solid var(--color-border);

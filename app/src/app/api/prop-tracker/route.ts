@@ -33,8 +33,14 @@ export async function GET() {
       tradeDate: { $gte: startOfDay }
     }).lean();
 
+    const allClosedTrades = await Trade.find({ 
+      accountId: propAccount._id, 
+      status: 'closed' 
+    }).lean();
+
     const dailyPnL = todaysTrades.reduce((sum, t) => sum + (t.pnl || 0), 0);
-    const totalPnL = (propAccount.balance || startingBalance) - startingBalance;
+    const totalPnL = allClosedTrades.reduce((sum, t) => sum + (t.pnl || 0), 0);
+    const currentBalance = startingBalance + totalPnL;
     
     // Drawdown calculations
     const dailyDrawdownAmount = startingBalance * (dailyDrawdownLimit / 100);
@@ -50,7 +56,7 @@ export async function GET() {
       accountName: propAccount.accountName,
       metrics: {
         startingBalance,
-        currentBalance: propAccount.balance,
+        currentBalance: currentBalance,
         dailyPnL,
         totalPnL,
         dailyDrawdownLimit,

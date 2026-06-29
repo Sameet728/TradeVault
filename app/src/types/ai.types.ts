@@ -68,6 +68,8 @@ export interface TradingAccount {
   type: AccountType;
   propFirmSettings?: PropFirmSettings;
   isActive: boolean;
+  isPublic: boolean;
+  publicSlug?: string;
   createdAt: string;
   updatedAt: string;
 }
