@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/nextjs';
+import { SignInButton, SignUpButton, useAuth } from '@clerk/nextjs';
 import { ArrowRight, BarChart3, Calendar, Mail, Zap, LayoutDashboard, BrainCircuit } from 'lucide-react';
 
 export default function LandingPage() {
+  const { isSignedIn } = useAuth();
+
   return (
     <div className="landing-container">
       {/* Navbar */}
@@ -14,19 +16,20 @@ export default function LandingPage() {
           <span className="logo-text">TradeVault</span>
         </div>
         <div className="nav-actions">
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button className="btn-login">Log in</button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <button className="btn-signup">Get Started</button>
-            </SignUpButton>
-          </SignedOut>
-          <SignedIn>
+          {!isSignedIn ? (
+            <>
+              <SignInButton mode="modal">
+                <button className="btn-login">Log in</button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="btn-signup">Get Started</button>
+              </SignUpButton>
+            </>
+          ) : (
             <Link href="/dashboard" className="btn-dashboard">
               Go to Dashboard <ArrowRight size={16} />
             </Link>
-          </SignedIn>
+          )}
         </div>
       </nav>
 
@@ -48,18 +51,17 @@ export default function LandingPage() {
           </p>
           
           <div className="hero-cta">
-            <SignedOut>
+            {!isSignedIn ? (
               <SignUpButton mode="modal">
                 <button className="btn-primary">
                   Start Journaling Free <ArrowRight size={18} />
                 </button>
               </SignUpButton>
-            </SignedOut>
-            <SignedIn>
+            ) : (
               <Link href="/dashboard" className="btn-primary">
                 Open Dashboard <LayoutDashboard size={18} />
               </Link>
-            </SignedIn>
+            )}
           </div>
         </div>
       </main>
@@ -109,14 +111,13 @@ export default function LandingPage() {
       {/* Footer CTA */}
       <footer className="footer-cta">
         <h2>Ready to track your success?</h2>
-        <SignedOut>
+        {!isSignedIn ? (
           <SignUpButton mode="modal">
             <button className="btn-primary large">Create Your Free Account</button>
           </SignUpButton>
-        </SignedOut>
-        <SignedIn>
+        ) : (
           <Link href="/dashboard" className="btn-primary large">Go to Dashboard</Link>
-        </SignedIn>
+        )}
         <p className="copyright">© 2026 TradeVault. Built for traders.</p>
       </footer>
 
