@@ -28,7 +28,7 @@ export function DashboardShell({ children, userName, userImage }: DashboardShell
         sidebarCollapsed={sidebarCollapsed}
       />
       <main className={`main-content ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-        <div className="page-inner">
+        <div className="page-inner" style={{ padding: '28px 32px', maxWidth: 1400 }}>
           {children}
         </div>
       </main>
