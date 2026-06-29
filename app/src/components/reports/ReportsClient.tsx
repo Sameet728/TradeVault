@@ -1,0 +1,201 @@
+'use client';
+
+import { useTransition } from 'react';
+import { toast } from 'sonner';
+import { FileText, Download } from 'lucide-react';
+import { formatCurrency, formatPercent, formatDate } from '@/lib/utils';
+import type { DashboardStats, EquityPoint, MonthlyReturn, StrategyStat } from '@/types/analytics.types';
+
+interface ReportsClientProps {
+  stats: DashboardStats;
+  equityCurve: EquityPoint[];
+  monthlyReturns: MonthlyReturn[];
+  strategyStats: StrategyStat[];
+}
+
+export function ReportsClient({ stats, equityCurve, monthlyReturns, strategyStats }: ReportsClientProps) {
+  const [isPending, startTransition] = useTransition();
+
+  async function generatePDF() {
+    startTransition(async () => {
+      try {
+        // Dynamic import to avoid SSR issues
+        const jsPDF = (await import('jspdf')).default;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 20;
+        let y = margin;
+
+        // Header
+        doc.setFillColor(10, 10, 10);
+        doc.rect(0, 0, pageWidth, 40, 'F');
+        doc.setTextColor(250, 250, 250);
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TradeVault Report', margin, 22);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(161, 161, 170);
+        doc.text(`Generated: ${formatDate(new Date().toISOString())}`, margin, 32);
+        y = 52;
+
+        // Stats Section
+        doc.setTextColor(250, 250, 250);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Performance Summary', margin, y);
+        y += 8;
+
+        doc.setDrawColor(38, 38, 38);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 8;
+
+        const statRows = [
+          ['Total Trades', stats.totalTrades.toString()],
+          ['Win Rate', formatPercent(stats.winRate)],
+          ['Profit Factor', stats.profitFactor >= 999 ? '∞' : stats.profitFactor.toFixed(2)],
+          ['Net Profit', formatCurrency(stats.netProfit)],
+          ['Average RR', `${stats.averageRR.toFixed(2)}R`],
+          ['Largest Win', formatCurrency(stats.largestWin)],
+          ['Largest Loss', formatCurrency(stats.largestLoss)],
+          ['Max Drawdown', formatPercent(stats.maxDrawdown)],
+          ['Monthly PnL', formatCurrency(stats.monthlyPnl)],
+        ];
+
+        doc.setFontSize(10);
+        for (const [label, value] of statRows) {
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(161, 161, 170);
+          doc.text(label, margin, y);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(250, 250, 250);
+          doc.text(value, pageWidth - margin, y, { align: 'right' });
+          y += 7;
+        }
+
+        y += 8;
+
+        // Monthly Returns
+        if (monthlyReturns.length > 0) {
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(250, 250, 250);
+          doc.text('Monthly Returns', margin, y);
+          y += 8;
+          doc.setDrawColor(38, 38, 38);
+          doc.line(margin, y, pageWidth - margin, y);
+          y += 8;
+
+          doc.setFontSize(9);
+          for (const m of monthlyReturns.slice(-12)) {
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(161, 161, 170);
+            doc.text(m.month, margin, y);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(m.pnl >= 0 ? 34 : 239, m.pnl >= 0 ? 197 : 68, m.pnl >= 0 ? 94 : 68);
+            doc.text(formatCurrency(m.pnl, 'USD', true), pageWidth - margin, y, { align: 'right' });
+            y += 7;
+            if (y > 270) { doc.addPage(); y = 20; }
+          }
+        }
+
+        // Strategy Stats
+        if (strategyStats.length > 0) {
+          if (y > 240) { doc.addPage(); y = 20; }
+          y += 8;
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(250, 250, 250);
+          doc.text('Strategy Performance', margin, y);
+          y += 8;
+          doc.line(margin, y, pageWidth - margin, y);
+          y += 8;
+
+          for (const s of strategyStats) {
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(250, 250, 250);
+            doc.text(s.strategyName, margin, y);
+            y += 6;
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(161, 161, 170);
+            doc.text(
+              `Trades: ${s.trades}  WR: ${s.winRate.toFixed(1)}%  PF: ${s.profitFactor.toFixed(2)}  PnL: ${formatCurrency(s.netPnl, 'USD', true)}`,
+              margin, y
+            );
+            y += 8;
+            if (y > 270) { doc.addPage(); y = 20; }
+          }
+        }
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(82, 82, 91);
+        doc.text('Generated by TradeVault', margin, 290);
+        doc.text(`Page 1`, pageWidth - margin, 290, { align: 'right' });
+
+        doc.save(`trading-report-${new Date().toISOString().split('T')[0]}.pdf`);
+        toast.success('PDF report downloaded!');
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to generate PDF');
+      }
+    });
+  }
+
+  return (
+    <div className="reports-layout">
+      <div className="report-card card">
+        <div className="report-icon">
+          <FileText size={24} color="#3b82f6" />
+        </div>
+        <div className="report-info">
+          <h3 className="report-name">Performance Report</h3>
+          <p className="report-desc">
+            Complete trading performance summary including stats, monthly returns, and strategy breakdown.
+          </p>
+          <div className="report-meta">
+            <span className="meta-badge">{stats.totalTrades} trades</span>
+            <span className="meta-badge">{monthlyReturns.length} months</span>
+            <span className="meta-badge">{strategyStats.length} strategies</span>
+          </div>
+        </div>
+        <button
+          id="btn-generate-pdf"
+          className="btn-download"
+          onClick={generatePDF}
+          disabled={isPending || stats.totalTrades === 0}
+        >
+          {isPending ? <span className="spinner" /> : <Download size={15} />}
+          {isPending ? 'Generating...' : 'Download PDF'}
+        </button>
+      </div>
+
+      {stats.totalTrades === 0 && (
+        <div className="empty-hint">
+          <span>Add some trades first to generate a report.</span>
+        </div>
+      )}
+
+      <style jsx>{`
+        .reports-layout { display: flex; flex-direction: column; gap: 16px; max-width: 700px; }
+        .report-card { padding: 24px; display: flex; align-items: center; gap: 20px; }
+        @media (max-width: 600px) { .report-card { flex-direction: column; align-items: flex-start; } }
+        .report-icon { width: 52px; height: 52px; border-radius: 14px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .report-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .report-name { font-size: 1rem; font-weight: 600; color: var(--color-foreground); margin: 0; }
+        .report-desc { font-size: 0.875rem; color: var(--color-muted-foreground); margin: 0; line-height: 1.4; }
+        .report-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+        .meta-badge { padding: 2px 8px; border-radius: 99px; background: var(--color-border-subtle); border: 1px solid var(--color-border); font-size: 0.75rem; color: #71717a; }
+        .btn-download { display: flex; align-items: center; gap: 8px; padding: 10px 18px; background: #3b82f6; border: none; border-radius: 8px; color: white; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background 0.15s; font-family: inherit; white-space: nowrap; }
+        .btn-download:hover { background: #2563eb; }
+        .btn-download:disabled { opacity: 0.6; cursor: not-allowed; }
+        .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        .empty-hint { padding: 12px 16px; font-size: 0.875rem; color: #71717a; background: rgba(255,255,255,0.02); border: 1px dashed var(--color-border); border-radius: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
+    </div>
+  );
+}
