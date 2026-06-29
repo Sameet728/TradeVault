@@ -18,6 +18,8 @@ export interface ITradingAccount extends Document {
   type: 'personal' | 'prop';
   propFirmSettings?: IPropFirmSettings;
   isActive: boolean;
+  isPublic: boolean;
+  publicSlug?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,6 +50,8 @@ const TradingAccountSchema = new Schema<ITradingAccount>(
     type: { type: String, enum: ['personal', 'prop'], default: 'personal' },
     propFirmSettings: { type: PropFirmSettingsSchema },
     isActive: { type: Boolean, default: true },
+    isPublic: { type: Boolean, default: false },
+    publicSlug: { type: String, unique: true, sparse: true },
   },
   { timestamps: true }
 );

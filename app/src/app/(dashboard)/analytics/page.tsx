@@ -11,6 +11,8 @@ import {
 import { PageHeader } from '@/components/shared/PageHeader';
 import { AnalyticsCharts } from '@/components/charts/AnalyticsCharts';
 import { ParameterAnalytics } from '@/components/analytics/ParameterAnalytics';
+import { TimeHeatmap } from '@/components/analytics/TimeHeatmap';
+import { CalendarView } from '@/components/calendar/CalendarView';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -51,6 +53,16 @@ export default async function AnalyticsPage() {
       {/* Strategy Engine - Parameter Analytics */}
       <div className="mt-6 mb-6">
         <ParameterAnalytics strategyId="" />
+      </div>
+
+      {/* Time & Session Heatmaps */}
+      <div className="mt-6 mb-6">
+        <TimeHeatmap />
+      </div>
+
+      {/* Calendar View */}
+      <div className="mt-6 mb-6">
+        <CalendarView />
       </div>
     </div>
   );

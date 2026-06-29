@@ -14,6 +14,7 @@ import {
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
 import { MistakeCostWidget } from '@/components/dashboard/MistakeCostWidget';
 import { EdgeDiscoveryWidget } from '@/components/dashboard/EdgeDiscoveryWidget';
+import { PropFirmTrackerWidget } from '@/components/dashboard/PropFirmTrackerWidget';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
 import { getTradesAction } from '@/actions/trade.actions';
 
@@ -61,6 +62,11 @@ export default async function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Prop Firm Tracker */}
+      <div className="mb-6">
+        <PropFirmTrackerWidget />
+      </div>
 
       {/* Stats Grid */}
       <Suspense fallback={<StatsGridSkeleton />}>

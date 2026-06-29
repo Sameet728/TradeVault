@@ -9,6 +9,7 @@ import {
   Settings, Upload, Target, FileText, BrainCircuit,
   ChevronRight, Wallet, PanelLeftClose, PanelLeftOpen, BookOpen,
 } from 'lucide-react';
+import { Logo } from '@/components/shared/Logo';
 import { ThemeToggle } from './ThemeToggle';
 
 interface NavItem {
@@ -97,10 +98,7 @@ export function Sidebar({ userName, isOpen = true, onClose, onCollapsedChange }:
         {/* Header — Logo + Collapse button */}
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <div className="sidebar-logo-icon">
-              <TrendingUp size={13} />
-            </div>
-            {!collapsed && <span className="sidebar-logo-text">TradeVault</span>}
+            {!collapsed && <Logo />}
           </div>
           <button
             className="collapse-btn"
