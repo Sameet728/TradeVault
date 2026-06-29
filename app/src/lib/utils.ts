@@ -32,14 +32,26 @@ export function formatPercent(value: number, showSign: boolean = false): string 
   return formatted;
 }
 
-export function formatDate(date: string | Date, fmt: string = 'MMM dd, yyyy'): string {
-  const d = typeof date === 'string' ? parseISO(date) : date;
-  return format(d, fmt);
+export function formatDate(date: string | Date | undefined | null, fmt: string = 'MMM dd, yyyy'): string {
+  if (!date || date === 'undefined' || date === 'null') return 'N/A';
+  try {
+    const d = typeof date === 'string' ? parseISO(date) : date;
+    if (isNaN(d.valueOf())) return 'N/A';
+    return format(d, fmt);
+  } catch (e) {
+    return 'N/A';
+  }
 }
 
-export function formatDateTime(date: string | Date): string {
-  const d = typeof date === 'string' ? parseISO(date) : date;
-  return format(d, 'MMM dd, yyyy HH:mm');
+export function formatDateTime(date: string | Date | undefined | null): string {
+  if (!date || date === 'undefined' || date === 'null') return 'N/A';
+  try {
+    const d = typeof date === 'string' ? parseISO(date) : date;
+    if (isNaN(d.valueOf())) return 'N/A';
+    return format(d, 'MMM dd, yyyy HH:mm');
+  } catch (e) {
+    return 'N/A';
+  }
 }
 
 export function getPnLColor(value: number): string {

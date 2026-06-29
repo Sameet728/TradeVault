@@ -50,10 +50,11 @@ export async function getEquityCurveAction(filters?: AnalyticsFilters): Promise<
     });
   }
   await connectDB();
-  const trades = await Trade.find(buildQuery(userId, filters))
+  const rawTrades = await Trade.find(buildQuery(userId, filters))
     .sort({ tradeDate: 1 })
     .select('tradeDate pnl')
     .lean();
+  const trades = rawTrades.filter(t => t.tradeDate && !isNaN(new Date(t.tradeDate).valueOf()));
 
   let balance = 0;
   let peak = 0;
@@ -75,10 +76,11 @@ export async function getDailyPnLAction(filters?: AnalyticsFilters): Promise<Dai
   if (!userId) return [];
 
   await connectDB();
-  const trades = await Trade.find(buildQuery(userId, filters))
+  const rawTrades = await Trade.find(buildQuery(userId, filters))
     .sort({ tradeDate: 1 })
     .select('tradeDate pnl')
     .lean();
+  const trades = rawTrades.filter(t => t.tradeDate && !isNaN(new Date(t.tradeDate).valueOf()));
 
   const byDay: Record<string, { pnl: number; trades: number; wins: number }> = {};
   for (const t of trades) {
@@ -102,10 +104,11 @@ export async function getMonthlyReturnsAction(filters?: AnalyticsFilters): Promi
   if (!userId) return [];
 
   await connectDB();
-  const trades = await Trade.find(buildQuery(userId, filters))
+  const rawTrades = await Trade.find(buildQuery(userId, filters))
     .sort({ tradeDate: 1 })
     .select('tradeDate pnl')
     .lean();
+  const trades = rawTrades.filter(t => t.tradeDate && !isNaN(new Date(t.tradeDate).valueOf()));
 
   const byMonth: Record<string, { pnl: number; trades: number; wins: number }> = {};
   for (const t of trades) {
