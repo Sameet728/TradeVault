@@ -19,7 +19,8 @@
 /* ══════════════════════════════════════
    DARK THEME (DEFAULT — PROFESSIONAL)
 ══════════════════════════════════════ */
-:root {
+:root,
+.dark {
   --color-background:       #0A0A0A;
   --color-surface:          #111111;
   --color-card:             #171717;
