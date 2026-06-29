@@ -13,9 +13,9 @@ export function TradeGrid({
   total,
 }: {
   trades: Trade[];
-  totalPages: number;
-  currentPage: number;
-  total: number;
+  totalPages?: number;
+  currentPage?: number;
+  total?: number;
 }) {
   if (trades.length === 0) {
     return (
@@ -101,7 +101,7 @@ export function TradeGrid({
       `}</style>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalPages !== undefined && totalPages > 1 && currentPage !== undefined && total !== undefined && (
         <div className="pagination" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px', padding: '16px', background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
           <span className="pag-info" style={{ fontSize: '0.875rem', color: 'var(--color-muted-foreground)' }}>
             Page {currentPage} of {totalPages} ({total} trades)

@@ -1,4 +1,5 @@
 import { getCalendarDataAction } from '@/actions/analytics.actions';
+import { getTradesAction } from '@/actions/trade.actions';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { CalendarView } from '@/components/charts/CalendarView';
 import type { Metadata } from 'next';
@@ -22,7 +23,10 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
 
   const dateFrom = new Date(year, month, 1).toISOString();
   const dateTo = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
-  const calendarData = await getCalendarDataAction({ dateFrom, dateTo });
+  const [calendarData, tradesRes] = await Promise.all([
+    getCalendarDataAction({ dateFrom, dateTo }),
+    getTradesAction({ dateFrom, dateTo, limit: 1000 })
+  ]);
 
   return (
     <div className="animate-fade-in">
@@ -30,7 +34,7 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
         title="Calendar"
         description="Your trading activity day by day"
       />
-      <CalendarView calendarData={calendarData} year={year} month={month} />
+      <CalendarView calendarData={calendarData} year={year} month={month} trades={tradesRes.trades} />
     </div>
   );
 }

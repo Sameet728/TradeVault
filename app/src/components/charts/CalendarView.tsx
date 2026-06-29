@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { format, getDaysInMonth, startOfMonth, getDay } from 'date-fns';
 import type { CalendarDay } from '@/types/analytics.types';
+import type { Trade } from '@/types/trade.types';
 import { formatCurrency } from '@/lib/utils';
+import { TradeGrid } from '@/components/trades/TradeGrid';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -17,9 +20,11 @@ interface CalendarViewProps {
   calendarData: CalendarDay[];
   year: number;
   month: number;
+  trades?: Trade[];
 }
 
-export function CalendarView({ calendarData, year, month }: CalendarViewProps) {
+export function CalendarView({ calendarData, year, month, trades = [] }: CalendarViewProps) {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const dayMap = new Map(calendarData.map((d) => [d.date, d]));
 
   const firstDay = startOfMonth(new Date(year, month));
@@ -95,11 +100,15 @@ export function CalendarView({ calendarData, year, month }: CalendarViewProps) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const dayData = dayMap.get(dateStr);
             const isToday = dateStr === format(new Date(), 'yyyy-MM-dd');
+            const isSelected = dateStr === selectedDate;
 
             return (
               <div
                 key={day}
-                className={`day-cell ${dayData?.status ?? 'none'} ${isToday ? 'today' : ''}`}
+                className={`day-cell ${dayData?.status ?? 'none'} ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
+                onClick={() => setSelectedDate(dateStr)}
+                role="button"
+                tabIndex={0}
               >
                 <span className="day-num">{day}</span>
                 {dayData && (
@@ -136,6 +145,23 @@ export function CalendarView({ calendarData, year, month }: CalendarViewProps) {
         </div>
       </div>
 
+      {/* Selected Day Trades */}
+      {selectedDate && (
+        <div className="selected-day-trades">
+          <div className="selected-day-header">
+            <h3>Trades for {format(new Date(selectedDate), 'MMM dd, yyyy')}</h3>
+            <button className="close-btn" onClick={() => setSelectedDate(null)} aria-label="Close trades">
+              <X size={20} />
+            </button>
+          </div>
+          {(() => {
+            const dayTrades = trades.filter(t => t.tradeDate.split('T')[0] === selectedDate);
+            if (dayTrades.length === 0) return <p className="text-muted">No trades recorded on this day.</p>;
+            return <TradeGrid trades={dayTrades} />;
+          })()}
+        </div>
+      )}
+
       <style jsx>{`
         .calendar-wrap { display: flex; flex-direction: column; gap: 16px; }
         .cal-header {
@@ -166,12 +192,12 @@ export function CalendarView({ calendarData, year, month }: CalendarViewProps) {
         }
         .days-grid {}
         .day-cell {
-          min-height: 72px; border-radius: 8px;
+          min-height: 72px; border-radius: 8px; cursor: pointer;
           padding: 6px 8px; display: flex; flex-direction: column;
           border: 1px solid transparent; transition: all 0.12s;
           position: relative;
         }
-        .day-cell.empty { background: transparent; }
+        .day-cell.empty { background: transparent; cursor: default; }
         .day-cell.none { background: rgba(255,255,255,0.01); border-color: var(--color-border-subtle); }
         .day-cell.profit {
           background: rgba(34,197,94,0.06);
@@ -186,6 +212,7 @@ export function CalendarView({ calendarData, year, month }: CalendarViewProps) {
           border-color: rgba(245,158,11,0.12);
         }
         .day-cell.today { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f620 inset; }
+        .day-cell.selected { border-color: var(--color-foreground); box-shadow: 0 0 0 1px var(--color-foreground) inset; }
         .day-cell:hover:not(.empty) { border-color: var(--color-border); }
         .day-num {
           font-size: 0.8125rem; font-weight: 600; color: var(--color-muted-foreground);
@@ -209,11 +236,32 @@ export function CalendarView({ calendarData, year, month }: CalendarViewProps) {
         .legend-swatch.loss { background: rgba(239,68,68,0.4); border: 1px solid rgba(239,68,68,0.3); }
         .legend-swatch.breakeven { background: rgba(245,158,11,0.3); border: 1px solid rgba(245,158,11,0.25); }
         .legend-swatch.none { background: var(--color-border-subtle); border: 1px solid var(--color-border-subtle); }
+        
+        .selected-day-trades {
+          margin-top: 24px;
+          animation: slideUp 0.3s ease;
+        }
+        .selected-day-header {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 16px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid var(--color-border-subtle);
+        }
+        .selected-day-header h3 { font-size: 1.25rem; font-weight: 600; color: var(--color-foreground); margin: 0; }
+        .close-btn { background: none; border: none; color: var(--color-muted-foreground); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; }
+        .close-btn:hover { background: var(--color-border-subtle); color: var(--color-foreground); }
+        .text-muted { color: var(--color-muted-foreground); font-size: 0.875rem; }
+
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 600px) {
           .cal-summary { gap: 8px; }
           .cal-stat-val { font-size: 0.8125rem; }
-          .day-cell { min-height: 50px; }
-          .day-pnl { display: none; }
+          .day-cell { min-height: 60px; padding: 4px; }
+          .day-pnl { font-size: 0.625rem; }
         }
       `}</style>
     </div>
