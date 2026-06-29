@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import type { TradingAccount } from '@/types/ai.types';
 import { toast } from 'sonner';
 import { createAccountAction, deleteAccountAction, updateAccountAction } from '@/actions/account.actions';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -90,6 +91,7 @@ export function AccountsClient({ accounts }: AccountsClientProps) {
           maxDrawdownLimit: parseFloat(maxDD) || 10,
           startingBalance: parseFloat(balance) || 0,
         } : undefined,
+        isPublic: false,
       };
 
       if (editingId) {

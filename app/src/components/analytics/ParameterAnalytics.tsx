@@ -89,8 +89,8 @@ export function ParameterAnalytics({ strategyId }: { strategyId: string }) {
               <Tooltip 
                 cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                 contentStyle={{ background: '#0A0A0A', border: '1px solid #262626', borderRadius: '6px' }}
-                formatter={(val: number, name: string) => [
-                  name === 'totalPnL' ? formatCurrency(val) : name === 'winRate' ? `${val.toFixed(1)}%` : val, 
+                formatter={(val: any, name: any) => [
+                  name === 'totalPnL' ? formatCurrency(val) : name === 'winRate' ? `${Number(val).toFixed(1)}%` : val, 
                   name === 'totalPnL' ? 'Net Profit' : name === 'winRate' ? 'Win Rate' : 'Trades'
                 ]}
               />

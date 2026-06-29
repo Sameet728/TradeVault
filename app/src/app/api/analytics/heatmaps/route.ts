@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Trade } from '@/models/Trade';
+import { PipelineStage } from 'mongoose';
 import { currentUser } from '@clerk/nextjs/server';
 
 export async function GET() {
@@ -11,7 +12,7 @@ export async function GET() {
     await connectDB();
 
     // Group by Day of Week and Hour of Day using MongoDB date operators
-    const pipeline = [
+    const pipeline: PipelineStage[] = [
       {
         $match: {
           userId: user.id,

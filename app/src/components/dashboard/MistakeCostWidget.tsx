@@ -38,7 +38,7 @@ export function MistakeCostWidget() {
               <Tooltip 
                 cursor={{ fill: '#1C1C1C' }}
                 contentStyle={{ background: '#0A0A0A', border: '1px solid #262626', borderRadius: '6px' }}
-                formatter={(val: number) => [formatCurrency(val), 'Cost']}
+                formatter={(val: any) => [formatCurrency(val), 'Cost']}
               />
               <Bar dataKey="cost" radius={[0, 4, 4, 0]} barSize={24}>
                 {data.map((entry, index) => (

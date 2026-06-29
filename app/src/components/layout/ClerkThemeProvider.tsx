@@ -18,7 +18,7 @@ export function ClerkThemeProvider({ children }: { children: ReactNode }) {
         elements: {
           card: 'shadow-none border border-[var(--color-border)]',
         }
-      }}
+      } as any}
     >
       {children}
     </ClerkProvider>

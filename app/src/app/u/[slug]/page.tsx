@@ -56,7 +56,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     currentBalance += (t.pnl || 0);
     return {
       date: new Date(t.tradeDate).toLocaleDateString(),
-      balance: currentBalance
+      balance: currentBalance,
+      equity: currentBalance,
+      drawdown: 0
     };
   });
 

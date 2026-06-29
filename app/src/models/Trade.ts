@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface ITradeNote {
   idea?: string;
+  mistakes?: string;
   lessons?: string;
   emotion?: string;
 }
@@ -41,6 +42,7 @@ export interface ITrade extends Document {
 const TradeNoteSchema = new Schema<ITradeNote>(
   {
     idea: { type: String },
+    mistakes: { type: String },
     lessons: { type: String },
     emotion: { type: String },
   },

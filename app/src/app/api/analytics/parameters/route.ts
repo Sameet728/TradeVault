@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Trade } from '@/models/Trade';
 import { Strategy } from '@/models/Strategy';
+import { PipelineStage } from 'mongoose';
 import { currentUser } from '@clerk/nextjs/server';
 
 export async function GET(req: Request) {
@@ -31,7 +32,7 @@ export async function GET(req: Request) {
     // In MongoDB, Map values are stored as an object, so we query it via `parameterValues.<key>`
     const parameterField = `$parameterValues.${parameterKey}`;
 
-    const pipeline = [
+    const pipeline: PipelineStage[] = [
       {
         $match: {
           userId: user.id,

@@ -10,7 +10,7 @@ interface PublicProfileClientProps {
   winRate: number;
   profitFactor: number;
   totalTrades: number;
-  equityCurve: Array<{ date: string; balance: number }>;
+  equityCurve: Array<{ date: string; balance: number; equity: number; drawdown: number; }>;
 }
 
 export function PublicProfileClient({
