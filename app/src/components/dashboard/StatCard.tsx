@@ -8,25 +8,17 @@ interface StatCardProps {
   value: string | number;
   format?: 'currency' | 'percent' | 'number' | 'raw';
   currency?: string;
-  change?: number;       // % change from last period
+  change?: number;
   prefix?: string;
   suffix?: string;
   icon?: React.ReactNode;
-  positive?: boolean;    // override color
+  positive?: boolean;
   id?: string;
 }
 
 export function StatCard({
-  label,
-  value,
-  format = 'raw',
-  currency = 'USD',
-  change,
-  prefix,
-  suffix,
-  icon,
-  positive,
-  id,
+  label, value, format = 'raw', currency = 'USD',
+  change, prefix, suffix, icon, positive, id,
 }: StatCardProps) {
   function formatValue(): string {
     const num = typeof value === 'number' ? value : parseFloat(String(value));
@@ -39,10 +31,9 @@ export function StatCard({
     }
   }
 
-  const isPositive = positive ?? (typeof value === 'number' ? value >= 0 : true);
-  const colorClass = format === 'currency' || format === 'percent'
-    ? getPnLColor(typeof value === 'number' ? value : parseFloat(String(value)))
-    : '';
+  const numVal = typeof value === 'number' ? value : parseFloat(String(value));
+  const colorClass = (format === 'currency' || format === 'percent') && !isNaN(numVal)
+    ? getPnLColor(numVal) : '';
 
   return (
     <div className="stat-card card" id={id}>
@@ -51,51 +42,61 @@ export function StatCard({
         {icon && <span className="stat-icon">{icon}</span>}
       </div>
 
-      <div className={`stat-value ${colorClass}`}>
-        {prefix && <span className="stat-prefix">{prefix}</span>}
+      <div className={`stat-val ${colorClass}`}>
+        {prefix && <span className="stat-affix">{prefix}</span>}
         {formatValue()}
-        {suffix && <span className="stat-suffix">{suffix}</span>}
+        {suffix && <span className="stat-affix"> {suffix}</span>}
       </div>
 
       {change !== undefined && (
         <div className={`stat-change ${change >= 0 ? 'positive' : 'negative'}`}>
-          {change >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-          <span>{Math.abs(change).toFixed(1)}% from last month</span>
+          {change >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+          <span>{Math.abs(change).toFixed(1)}% vs last month</span>
         </div>
       )}
 
       <style jsx>{`
         .stat-card {
-          padding: 20px 24px;
-          display: flex; flex-direction: column; gap: 8px;
-          transition: border-color 0.15s;
+          padding: 16px 18px;
+          display: flex; flex-direction: column; gap: 6px;
+          transition: border-color 0.12s ease;
+          position: relative; overflow: hidden;
         }
-        .stat-card:hover { border-color: #3f3f46; }
+        .stat-card:hover { border-color: #3F3F46; }
+
         .stat-header {
           display: flex; align-items: center; justify-content: space-between;
         }
         .stat-label {
-          font-size: 0.75rem; font-weight: 500;
-          text-transform: uppercase; letter-spacing: 0.08em;
-          color: var(--color-muted-foreground);
+          font-size: 0.6875rem; font-weight: 600;
+          text-transform: uppercase; letter-spacing: 0.09em;
+          color: var(--color-placeholder);
         }
-        .stat-icon { color: var(--color-placeholder); }
-        .stat-value {
-          font-size: 1.875rem; font-weight: 700;
-          letter-spacing: -0.04em; line-height: 1;
+        .stat-icon { color: var(--color-placeholder); opacity: 0.6; }
+
+        .stat-val {
+          font-size: 1.625rem; font-weight: 700;
+          letter-spacing: -0.05em; line-height: 1;
           color: var(--color-foreground);
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .stat-prefix, .stat-suffix { font-size: 1rem; font-weight: 500; }
+        .stat-affix {
+          font-size: 1rem; font-weight: 500;
+          letter-spacing: -0.02em; opacity: 0.7;
+        }
         .stat-change {
           display: flex; align-items: center; gap: 4px;
-          font-size: 0.75rem; font-weight: 500;
+          font-size: 0.6875rem; font-weight: 500;
+          margin-top: 2px;
         }
-        .stat-change.positive { color: #22c55e; }
-        .stat-change.negative { color: #ef4444; }
-        :global(.text-success) { color: #22c55e; }
-        :global(.text-loss) { color: #ef4444; }
-        :global(.text-muted-foreground) { color: var(--color-muted-foreground); }
+        .stat-change.positive { color: var(--color-success); }
+        .stat-change.negative { color: var(--color-loss); }
+
+        :global(.text-success) { color: var(--color-success); }
+        :global(.text-loss) { color: var(--color-loss); }
       `}</style>
     </div>
   );
 }
+
+

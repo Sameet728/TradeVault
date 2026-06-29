@@ -12,6 +12,7 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children, userName, userImage }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <>
@@ -20,31 +21,17 @@ export function DashboardShell({ children, userName, userImage }: DashboardShell
         userImage={userImage}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onCollapsedChange={setSidebarCollapsed}
       />
       <Topbar
         onMenuClick={() => setSidebarOpen(true)}
+        sidebarCollapsed={sidebarCollapsed}
       />
-      <main className="main-content">
+      <main className={`main-content ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <div className="page-inner">
           {children}
         </div>
       </main>
-
-      <style jsx>{`
-        .main-content {
-          margin-left: 240px;
-          padding-top: 56px;
-          min-height: 100vh;
-        }
-        .page-inner {
-          padding: 32px;
-          max-width: 1400px;
-        }
-        @media (max-width: 768px) {
-          .main-content { margin-left: 0; }
-          .page-inner { padding: 20px 16px; }
-        }
-      `}</style>
     </>
   );
 }
