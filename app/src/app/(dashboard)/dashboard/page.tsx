@@ -12,6 +12,8 @@ import {
   BarChart2, AlertTriangle, Zap, Plus
 } from 'lucide-react';
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
+import { MistakeCostWidget } from '@/components/dashboard/MistakeCostWidget';
+import { EdgeDiscoveryWidget } from '@/components/dashboard/EdgeDiscoveryWidget';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
 import { getTradesAction } from '@/actions/trade.actions';
 
@@ -131,6 +133,12 @@ export default async function DashboardPage() {
           monthlyReturns={monthlyReturns}
         />
       )}
+
+      {/* Advanced Engines */}
+      <div className="advanced-engines-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+        <MistakeCostWidget />
+        <EdgeDiscoveryWidget />
+      </div>
 
       {/* Recent Trades */}
       <RecentTrades trades={recentTrades.trades} />

@@ -10,6 +10,7 @@ import {
 } from '@/actions/analytics.actions';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { AnalyticsCharts } from '@/components/charts/AnalyticsCharts';
+import { ParameterAnalytics } from '@/components/analytics/ParameterAnalytics';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -47,6 +48,10 @@ export default async function AnalyticsPage() {
         advancedStats={advancedStats}
         calendarData={calendarData}
       />
+      {/* Strategy Engine - Parameter Analytics */}
+      <div className="mt-6 mb-6">
+        <ParameterAnalytics strategyId="" />
+      </div>
     </div>
   );
 }

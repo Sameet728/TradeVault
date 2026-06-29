@@ -2,7 +2,6 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface ITradeNote {
   idea?: string;
-  mistakes?: string;
   lessons?: string;
   emotion?: string;
 }
@@ -18,6 +17,8 @@ export interface ITrade extends Document {
   stopLoss?: number;
   takeProfit?: number;
   lotSize: number;
+  commissions?: number;
+  swaps?: number;
   pnl?: number;
   rr?: number;
   tradeDate: Date;
@@ -29,7 +30,10 @@ export interface ITrade extends Document {
   notes: ITradeNote;
   status: 'open' | 'closed' | 'cancelled';
   importedFrom?: string;
+  externalTicketId?: string;
+  brokerConnectionId?: Types.ObjectId;
   tags?: string[];
+  mistakeIds?: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,7 +41,6 @@ export interface ITrade extends Document {
 const TradeNoteSchema = new Schema<ITradeNote>(
   {
     idea: { type: String },
-    mistakes: { type: String },
     lessons: { type: String },
     emotion: { type: String },
   },
@@ -56,6 +59,8 @@ const TradeSchema = new Schema<ITrade>(
     stopLoss: { type: Number },
     takeProfit: { type: Number },
     lotSize: { type: Number, required: true },
+    commissions: { type: Number, default: 0 },
+    swaps: { type: Number, default: 0 },
     pnl: { type: Number },
     rr: { type: Number },
     tradeDate: { type: Date, required: true },
@@ -67,7 +72,10 @@ const TradeSchema = new Schema<ITrade>(
     notes: { type: TradeNoteSchema, default: {} },
     status: { type: String, enum: ['open', 'closed', 'cancelled'], default: 'closed' },
     importedFrom: { type: String },
+    externalTicketId: { type: String },
+    brokerConnectionId: { type: Schema.Types.ObjectId, ref: 'BrokerConnection' },
     tags: [{ type: String }],
+    mistakeIds: [{ type: Schema.Types.ObjectId, ref: 'MistakeDefinition' }],
   },
   { timestamps: true }
 );

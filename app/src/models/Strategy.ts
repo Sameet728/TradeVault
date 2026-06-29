@@ -24,6 +24,9 @@ export interface IStrategy extends Document {
   parameters: IStrategyParameter[];
   checklist: IChecklistItem[];
   isActive: boolean;
+  version: number;
+  parentId?: Types.ObjectId;
+  archived: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -63,6 +66,9 @@ const StrategySchema = new Schema<IStrategy>(
     parameters: [StrategyParameterSchema],
     checklist: [ChecklistItemSchema],
     isActive: { type: Boolean, default: true },
+    version: { type: Number, default: 1 },
+    parentId: { type: Schema.Types.ObjectId, ref: 'Strategy' },
+    archived: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
