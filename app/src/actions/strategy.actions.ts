@@ -14,8 +14,8 @@ function toPlain(doc: IStrategy): StrategyType {
     ...obj,
     _id: obj._id.toString(),
     userId: obj.userId.toString(),
-    createdAt: obj.createdAt.toISOString(),
-    updatedAt: obj.updatedAt.toISOString(),
+    createdAt: obj.createdAt?.toISOString?.() || new Date().toISOString(),
+    updatedAt: obj.updatedAt?.toISOString?.() || new Date().toISOString(),
   };
 }
 
