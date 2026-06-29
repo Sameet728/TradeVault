@@ -101,8 +101,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background-color: #0A0A0A;
-  color-scheme: dark;
+  background-color: var(--color-background);
 }
 
 body {
@@ -115,7 +114,7 @@ body {
 }
 
 .light body, body.light {
-  background-color: #FAFAFA !important;
+  background-color: var(--color-background) !important;
 }
 
 .light {
